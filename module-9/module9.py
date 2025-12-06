@@ -175,7 +175,7 @@ def populate_employees(cursor):
         ("Bob Ulrich",),       # marketing assistant
         ("Henry Doyle",),      # production manager
         ("Maria Costanza",),   # distribution manager
-        ("Jon Doe",),          # production worker 1  
+        ("Jon Doe",),          # production worker 1
         ("Jane Smith",),       # production worker 2
     ]
     cursor.executemany(
