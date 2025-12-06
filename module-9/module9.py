@@ -175,7 +175,7 @@ def populate_employees(cursor):
         ("Bob Ulrich",),       # marketing assistant
         ("Henry Doyle",),      # production manager
         ("Maria Costanza",),   # distribution manager
-        ("Jon Doe",),          # production worker 1  
+        ("Jon Doe",),          # production worker 1
         ("Jane Smith",),       # production worker 2
     ]
     cursor.executemany(
@@ -297,6 +297,19 @@ def show_data(cursor, tables=None):
 
 def main():
     try:
+        # ===========================================================
+        # ADDED — create the database if it does not already exist
+        root_connection = mysql.connector.connect(
+            user=SECRETS["USER"],
+            password=SECRETS["PASSWORD"],
+            host=SECRETS["HOST"]
+        )
+        root_cursor = root_connection.cursor()
+        root_cursor.execute(f"CREATE DATABASE IF NOT EXISTS {SECRETS['DATABASE']};")
+        root_cursor.close()
+        root_connection.close()
+        # ===========================================================
+
         cnx = mysql.connector.connect(**CONFIG)
         cursor = cnx.cursor()
 
