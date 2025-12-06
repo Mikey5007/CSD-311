@@ -1,4 +1,7 @@
-"""Create and populate Bacchus Winery schema in MySQL."""
+"""Create and populate Bacchus Winery schema in MySQL.
+Defines tables, creates them in a MySQL database, and populates
+them with initial data. Create the database beforehand and
+set connection parameters in a .env file."""
 import mysql.connector
 from mysql.connector import errorcode
 from dotenv import dotenv_values
