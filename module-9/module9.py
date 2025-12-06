@@ -2,6 +2,7 @@
 Defines tables, creates them in a MySQL database, and populates
 them with initial data. Create the database beforehand and
 set connection parameters in a .env file."""
+
 import mysql.connector
 from mysql.connector import errorcode
 from dotenv import dotenv_values
@@ -93,7 +94,6 @@ CREATE TABLE IF NOT EXISTS time_entries (
 
 
 def create_tables(cursor):
-    # Drop child tables first (to avoid FK issues), then parents.
     drop_order = [
         "time_entries",
         "wine_shipments",
@@ -109,7 +109,6 @@ def create_tables(cursor):
         except mysql.connector.Error as err:
             print(f"Failed to drop table {name}: {err}")
 
-    # Create parent tables first, then children.
     create_order = [
         "suppliers",
         "wines",
@@ -124,20 +123,15 @@ def create_tables(cursor):
 
 
 def populate_suppliers(cursor):
-    # Case mentions 3 suppliers (bottles/corks, labels/boxes, vats/tubing).
     suppliers = [
         ("Bottle & Cork Co.",),
         ("Label & Box Inc.",),
         ("Vats & Tubing Ltd.",),
     ]
-    cursor.executemany(
-        "INSERT INTO suppliers (supplier_name) VALUES (%s);",
-        suppliers,
-    )
+    cursor.executemany("INSERT INTO suppliers (supplier_name) VALUES (%s);", suppliers)
 
 
 def populate_wines(cursor):
-    # Six wines from the case plus two plausible variants.
     wines = [
         ("Merlot",),
         ("Cabernet",),
@@ -146,10 +140,7 @@ def populate_wines(cursor):
         ("Merlot Reserve",),
         ("Cabernet Reserve",),
     ]
-    cursor.executemany(
-        "INSERT INTO wines (wine_name) VALUES (%s);",
-        wines,
-    )
+    cursor.executemany("INSERT INTO wines (wine_name) VALUES (%s);", wines)
 
 
 def populate_distributors(cursor):
@@ -161,33 +152,24 @@ def populate_distributors(cursor):
         ("Northern Spirits",),
         ("Coastal Wine Group",),
     ]
-    cursor.executemany(
-        "INSERT INTO distributors (distributor_name) VALUES (%s);",
-        distributors,
-    )
+    cursor.executemany("INSERT INTO distributors (distributor_name) VALUES (%s);", distributors)
 
 
 def populate_employees(cursor):
-    # Named employees from the case plus two generic production workers.
     employees = [
-        ("Janet Collins",),    # finance and payroll
-        ("Roz Murphy",),       # marketing head
-        ("Bob Ulrich",),       # marketing assistant
-        ("Henry Doyle",),      # production manager
-        ("Maria Costanza",),   # distribution manager
-        ("Jon Doe",),          # production worker 1  
-        ("Jane Smith",),       # production worker 2
+        ("Janet Collins",),
+        ("Roz Murphy",),
+        ("Bob Ulrich",),
+        ("Henry Doyle",),
+        ("Maria Costanza",),
+        ("Jon Doe",),
+        ("Jane Smith",),
     ]
-    cursor.executemany(
-        "INSERT INTO employees (employee_name) VALUES (%s);",
-        employees,
-    )
+    cursor.executemany("INSERT INTO employees (employee_name) VALUES (%s);", employees)
 
 
 def populate_supply_deliveries(cursor):
-    # Assume auto-increment IDs: suppliers 1, 2, 3.
     deliveries = [
-        # supplier_id, supply_item_type, expected_date, actual_date, qty
         (1, "BOTTLES", "2025-01-10", "2025-01-10", 10000),
         (1, "CORKS", "2025-01-10", "2025-01-12", 10000),
         (2, "LABELS", "2025-02-05", "2025-02-06", 8000),
@@ -198,42 +180,34 @@ def populate_supply_deliveries(cursor):
     cursor.executemany(
         """
         INSERT INTO supply_deliveries
-            (supplier_id, supply_item_type, expected_delivery_date,
-             actual_delivery_date, quantity_delivered)
-        VALUES (%s, %s, %s, %s, %s);
-        """,
-        deliveries,
+            (supplier_id, supply_item_type, expected_delivery_date, actual_delivery_date, quantity_delivered)
+        VALUES (%s,%s,%s,%s,%s);
+        """, deliveries
     )
 
 
 def populate_wine_shipments(cursor):
-    # Assume wines 1–6, distributors 1–6.
     shipments = [
-        # wine_id, distributor_id, shipment_date, quantity_shipped
-        (1, 1, "2025-01-15", 300),   # Merlot to Atlantic
-        (2, 2, "2025-01-18", 250),   # Cabernet to Pacific
-        (3, 3, "2025-01-20", 150),   # Chablis to Midwest
-        (4, 4, "2025-01-22", 200),   # Chardonnay to Southern
-        (1, 5, "2025-02-05", 220),   # Merlot to Northern
-        (2, 6, "2025-02-10", 260),   # Cabernet to Coastal
-        (4, 1, "2025-02-12", 180),   # Chardonnay to Atlantic
-        (3, 2, "2025-02-18", 130),   # Chablis to Pacific
+        (1, 1, "2025-01-15", 300),
+        (2, 2, "2025-01-18", 250),
+        (3, 3, "2025-01-20", 150),
+        (4, 4, "2025-01-22", 200),
+        (1, 5, "2025-02-05", 220),
+        (2, 6, "2025-02-10", 260),
+        (4, 1, "2025-02-12", 180),
+        (3, 2, "2025-02-18", 130),
     ]
     cursor.executemany(
         """
         INSERT INTO wine_shipments
             (wine_id, distributor_id, shipment_date, quantity_shipped)
-        VALUES (%s, %s, %s, %s);
-        """,
-        shipments,
+        VALUES (%s,%s,%s,%s);
+        """, shipments
     )
 
 
 def populate_time_entries(cursor):
-    # Assume employees 1–7.
-    # Several entries across different quarters.
     entries = [
-        # employee_id, work_date, hours_worked
         (1, "2025-01-05", 8.00),
         (1, "2025-01-06", 7.50),
         (2, "2025-01-05", 8.00),
@@ -251,24 +225,12 @@ def populate_time_entries(cursor):
         """
         INSERT INTO time_entries
             (employee_id, work_date, hours_worked)
-        VALUES (%s, %s, %s);
-        """,
-        entries,
+        VALUES (%s,%s,%s);
+        """, entries
     )
 
+
 def show_data(cursor, tables=None):
-    """
-    Display records from one or more tables, showing column names and values.
-
-    Args:
-        cursor: MySQL cursor object.
-        tables: None, a string table name, or a list of table names.
-                - None → show all tables defined in TABLES
-                - "suppliers" → show one table
-                - ["suppliers", "employees"] → show subset
-    """
-
-    # Normalize parameter to a list
     if tables is None:
         tables = list(TABLES.keys())
     elif isinstance(tables, str):
@@ -276,27 +238,36 @@ def show_data(cursor, tables=None):
 
     for table_name in tables:
         print(f"\n=== Data in table '{table_name}' ===")
-
-        # Query table
         cursor.execute(f"SELECT * FROM `{table_name}`;")
         rows = cursor.fetchall()
-
-        # Get column names from cursor description
         col_names = [col[0] for col in cursor.description]
 
         if not rows:
             print("(No rows)")
             continue
 
-        # Display rows with key/value pairs
         for row in rows:
             row_dict = dict(zip(col_names, row))
             for key, value in row_dict.items():
                 print(f"{key}: {value}")
             print("---")
 
+
 def main():
     try:
+        # ===========================================================
+        # ADDED — create the database if it does not already exist
+        root_connection = mysql.connector.connect(
+            user=SECRETS["USER"],
+            password=SECRETS["PASSWORD"],
+            host=SECRETS["HOST"]
+        )
+        root_cursor = root_connection.cursor()
+        root_cursor.execute(f"CREATE DATABASE IF NOT EXISTS {SECRETS['DATABASE']};")
+        root_cursor.close()
+        root_connection.close()
+        # ===========================================================
+
         cnx = mysql.connector.connect(**CONFIG)
         cursor = cnx.cursor()
 
